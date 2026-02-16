@@ -15,6 +15,8 @@ services:
       timeout: 5s
       retries: 10
     restart: unless-stopped
+    networks:
+      - message-feed-network
 
   telegram-listener:
     build:
@@ -36,6 +38,10 @@ services:
       rabbitmq:
         condition: service_healthy
     restart: unless-stopped
-
+    networks:
+      - message-feed-network
 volumes:
   rabbitmq_data:
+networks:
+  message-feed-network:
+    driver: bridge
