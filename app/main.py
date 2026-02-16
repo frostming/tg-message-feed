@@ -26,6 +26,12 @@ def _build_fullname(entity: Any) -> str | None:
     return first_name or last_name
 
 
+def _build_routing_key(chat_id: Any, fallback: str) -> str:
+    if chat_id is None:
+        return fallback
+    return f"chat:{chat_id}"
+
+
 def _extract_media_payload(message: Any) -> Dict[str, Any] | None:
     if not message.media:
         return None
@@ -132,11 +138,16 @@ async def run() -> None:
             service_name=settings.service_name,
             reply_to=_extract_reply_payload(reply_message),
         )
-        await publisher.publish(payload)
+        routing_key = _build_routing_key(
+            payload["chat_id"],
+            fallback=settings.mq_routing_key,
+        )
+        await publisher.publish(payload, routing_key=routing_key)
         logger.info(
-            "Published message chat_id=%s message_id=%s payload=%s",
+            "Published message chat_id=%s message_id=%s routing_key=%s payload=%s",
             payload["chat_id"],
             payload["message_id"],
+            routing_key,
             payload,
         )
 

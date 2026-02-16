@@ -76,6 +76,9 @@ RabbitMQ management UI:
 - Password: `RABBITMQ_PASSWORD`
 
 Default queue: `telegram.messages.raw`
+Routing key format for published messages: `chat:{chat_id}`
+
+The default queue is bound with `#`, so it receives all chat-specific routing keys.
 
 ## Event Schema
 

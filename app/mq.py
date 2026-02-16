@@ -28,9 +28,10 @@ class MQPublisher:
         )
 
         queue = await self._channel.declare_queue(self._settings.mq_queue, durable=True)
-        await queue.bind(self._exchange, routing_key=self._settings.mq_routing_key)
+        # Bind all routing keys so one queue can still consume messages from all chats.
+        await queue.bind(self._exchange, routing_key="#")
 
-    async def publish(self, payload: Dict[str, Any]) -> None:
+    async def publish(self, payload: Dict[str, Any], routing_key: str) -> None:
         if self._exchange is None:
             raise RuntimeError("MQPublisher is not connected")
 
@@ -44,7 +45,7 @@ class MQPublisher:
                 else DeliveryMode.NOT_PERSISTENT
             ),
         )
-        await self._exchange.publish(message, routing_key=self._settings.mq_routing_key)
+        await self._exchange.publish(message, routing_key=routing_key)
 
     async def close(self) -> None:
         if self._channel is not None:
