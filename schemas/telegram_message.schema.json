@@ -16,7 +16,7 @@
     "text",
     "date",
     "is_reply",
-    "reply_to_msg_id",
+    "reply_to",
     "has_media",
     "media",
     "out"
@@ -59,9 +59,41 @@
     "is_reply": {
       "type": "boolean"
     },
-    "reply_to_msg_id": {
-      "type": ["integer", "null"],
-      "minimum": 1
+    "reply_to": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "message_id",
+            "sender_id",
+            "sender_username",
+            "sender_fullname",
+            "text"
+          ],
+          "properties": {
+            "message_id": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "sender_id": {
+              "type": ["integer", "null"]
+            },
+            "sender_username": {
+              "type": ["string", "null"]
+            },
+            "sender_fullname": {
+              "type": ["string", "null"]
+            },
+            "text": {
+              "type": ["string", "null"]
+            }
+          }
+        }
+      ]
     },
     "has_media": {
       "type": "boolean"
@@ -144,6 +176,30 @@
     }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": {
+          "is_reply": {
+            "const": true
+          }
+        },
+        "required": ["is_reply"]
+      },
+      "then": {
+        "properties": {
+          "reply_to": {
+            "type": "object"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "reply_to": {
+            "type": "null"
+          }
+        }
+      }
+    },
     {
       "if": {
         "properties": {

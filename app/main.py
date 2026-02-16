@@ -18,6 +18,14 @@ logging.basicConfig(
 logger = logging.getLogger("telegram_listener")
 
 
+def _build_fullname(entity: Any) -> str | None:
+    first_name = getattr(entity, "first_name", None)
+    last_name = getattr(entity, "last_name", None)
+    if first_name and last_name:
+        return f"{first_name} {last_name}"
+    return first_name or last_name
+
+
 def _extract_media_payload(message: Any) -> Dict[str, Any] | None:
     if not message.media:
         return None
@@ -54,11 +62,27 @@ def _extract_media_payload(message: Any) -> Dict[str, Any] | None:
     }
 
 
-def _build_payload(event: events.NewMessage.Event, service_name: str) -> Dict[str, Any]:
+def _extract_reply_payload(reply_message: Any | None) -> Dict[str, Any] | None:
+    if reply_message is None:
+        return None
+
+    reply_sender = getattr(reply_message, "sender", None)
+    return {
+        "message_id": reply_message.id,
+        "sender_id": getattr(reply_message, "sender_id", None),
+        "sender_username": getattr(reply_sender, "username", None),
+        "sender_fullname": _build_fullname(reply_sender),
+        "text": reply_message.message,
+    }
+
+
+def _build_payload(
+    event: events.NewMessage.Event,
+    service_name: str,
+    reply_to: Dict[str, Any] | None,
+) -> Dict[str, Any]:
     message = event.message
     sender = event.sender
-    sender_first_name = getattr(sender, "first_name", None)
-    sender_last_name = getattr(sender, "last_name", None)
     return {
         "service": service_name,
         "event": "telegram.new_message",
@@ -67,17 +91,11 @@ def _build_payload(event: events.NewMessage.Event, service_name: str) -> Dict[st
         "sender_id": event.sender_id,
         "is_bot": bool(getattr(sender, "bot", None)),
         "sender_username": getattr(sender, "username", None),
-        "sender_fullname": (
-            sender_first_name + (f" {sender_last_name}" if sender_last_name else "")
-            if sender_first_name
-            else None
-        ),
+        "sender_fullname": _build_fullname(sender),
         "text": message.message,
         "date": message.date.astimezone(UTC).isoformat() if message.date else None,
         "is_reply": message.is_reply,
-        "reply_to_msg_id": message.reply_to.reply_to_msg_id
-        if message.reply_to
-        else None,
+        "reply_to": reply_to,
         "has_media": bool(message.media),
         "media": _extract_media_payload(message),
         "out": message.out,
@@ -105,7 +123,15 @@ async def run() -> None:
     @client.on(events.NewMessage(chats=settings.tg_target_chat))
     async def on_new_message(event: events.NewMessage.Event) -> None:
         await event.get_sender()
-        payload = _build_payload(event, service_name=settings.service_name)
+        reply_message = await event.get_reply_message() if event.message.is_reply else None
+        if reply_message is not None and getattr(reply_message, "sender", None) is None:
+            await reply_message.get_sender()
+
+        payload = _build_payload(
+            event,
+            service_name=settings.service_name,
+            reply_to=_extract_reply_payload(reply_message),
+        )
         await publisher.publish(payload)
         logger.info(
             "Published message chat_id=%s message_id=%s payload=%s",

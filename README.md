@@ -89,10 +89,18 @@ Published payload is JSON, for example:
   "message_id": 42,
   "sender_id": 10001,
   "is_bot": false,
+  "sender_username": "alice",
+  "sender_fullname": "Alice Chen",
   "text": "hello",
   "date": "2026-02-16T06:00:00+00:00",
-  "is_reply": false,
-  "reply_to_msg_id": null,
+  "is_reply": true,
+  "reply_to": {
+    "message_id": 41,
+    "sender_id": 9999,
+    "sender_username": "bob",
+    "sender_fullname": "Bob Li",
+    "text": "previous message"
+  },
   "has_media": true,
   "media": {
     "type": "photo",
