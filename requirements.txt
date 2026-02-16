@@ -1,2 +1,0 @@
-telethon==1.36.0
-aio-pika==9.4.3

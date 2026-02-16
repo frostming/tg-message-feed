@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/telegram_message.schema.json",
+  "title": "TelegramNewMessagePayload",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "service",
+    "event",
+    "chat_id",
+    "message_id",
+    "sender_id",
+    "is_bot",
+    "sender_username",
+    "sender_fullname",
+    "text",
+    "date",
+    "is_reply",
+    "reply_to_msg_id",
+    "has_media",
+    "media",
+    "out"
+  ],
+  "properties": {
+    "service": {
+      "type": "string",
+      "minLength": 1
+    },
+    "event": {
+      "type": "string",
+      "const": "telegram.new_message"
+    },
+    "chat_id": {
+      "type": "integer"
+    },
+    "message_id": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "sender_id": {
+      "type": ["integer", "null"]
+    },
+    "is_bot": {
+      "type": "boolean"
+    },
+    "sender_username": {
+      "type": ["string", "null"]
+    },
+    "sender_fullname": {
+      "type": ["string", "null"]
+    },
+    "text": {
+      "type": ["string", "null"]
+    },
+    "date": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "is_reply": {
+      "type": "boolean"
+    },
+    "reply_to_msg_id": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "has_media": {
+      "type": "boolean"
+    },
+    "media": {
+      "anyOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "type",
+            "class_name",
+            "grouped_id",
+            "file_id",
+            "name",
+            "ext",
+            "mime_type",
+            "size",
+            "width",
+            "height",
+            "duration"
+          ],
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": [
+                "photo",
+                "video",
+                "voice",
+                "audio",
+                "gif",
+                "sticker",
+                "document",
+                "unknown"
+              ]
+            },
+            "class_name": {
+              "type": "string"
+            },
+            "grouped_id": {
+              "type": ["integer", "null"]
+            },
+            "file_id": {
+              "type": ["integer", "string", "null"]
+            },
+            "name": {
+              "type": ["string", "null"]
+            },
+            "ext": {
+              "type": ["string", "null"]
+            },
+            "mime_type": {
+              "type": ["string", "null"]
+            },
+            "size": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            },
+            "width": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            },
+            "height": {
+              "type": ["integer", "null"],
+              "minimum": 0
+            },
+            "duration": {
+              "type": ["integer", "number", "null"],
+              "minimum": 0
+            }
+          }
+        }
+      ]
+    },
+    "out": {
+      "type": "boolean"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "has_media": {
+            "const": true
+          }
+        },
+        "required": ["has_media"]
+      },
+      "then": {
+        "properties": {
+          "media": {
+            "type": "object"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "media": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -88,14 +88,32 @@ Published payload is JSON, for example:
   "chat_id": -1001234567890,
   "message_id": 42,
   "sender_id": 10001,
+  "is_bot": false,
   "text": "hello",
   "date": "2026-02-16T06:00:00+00:00",
   "is_reply": false,
   "reply_to_msg_id": null,
-  "has_media": false,
+  "has_media": true,
+  "media": {
+    "type": "photo",
+    "class_name": "MessageMediaPhoto",
+    "grouped_id": null,
+    "file_id": 1234567890,
+    "name": null,
+    "ext": ".jpg",
+    "mime_type": "image/jpeg",
+    "size": 204800,
+    "width": 1280,
+    "height": 720,
+    "duration": null
+  },
   "out": false
 }
 ```
+
+The JSON Schema for payload validation is available at:
+
+- `schemas/telegram_message.schema.json`
 
 ## Notes
 
