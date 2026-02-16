@@ -1,0 +1,41 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3.13-management
+    container_name: message-feed-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "35672:5672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  telegram-listener:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: message-feed-listener
+    environment:
+      TG_API_ID: ${TG_API_ID:?TG_API_ID is required}
+      TG_API_HASH: ${TG_API_HASH:?TG_API_HASH is required}
+      TG_SESSION_STRING: ${TG_SESSION_STRING:?TG_SESSION_STRING is required}
+      TG_TARGET_CHAT: ${TG_TARGET_CHAT:?TG_TARGET_CHAT is required}
+      MQ_URL: ${MQ_URL:-amqp://guest:guest@rabbitmq:5672/}
+      MQ_EXCHANGE: ${MQ_EXCHANGE:-telegram.messages}
+      MQ_QUEUE: ${MQ_QUEUE:-telegram.messages.raw}
+      MQ_ROUTING_KEY: ${MQ_ROUTING_KEY:-telegram.message}
+      MQ_PERSISTENT: ${MQ_PERSISTENT:-true}
+      SERVICE_NAME: ${SERVICE_NAME:-telegram-userbot-listener}
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  rabbitmq_data:
