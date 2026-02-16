@@ -113,12 +113,7 @@ async def run() -> None:
     publisher = MQPublisher(settings)
 
     await publisher.connect()
-    logger.info(
-        "Connected to MQ exchange=%s queue=%s routing_key=%s",
-        settings.mq_exchange,
-        settings.mq_queue,
-        settings.mq_routing_key,
-    )
+    logger.info("Connected to MQ exchange=%s", settings.mq_exchange)
 
     client = TelegramClient(
         StringSession(settings.tg_session_string),
@@ -129,7 +124,9 @@ async def run() -> None:
     @client.on(events.NewMessage(chats=settings.tg_target_chat))
     async def on_new_message(event: events.NewMessage.Event) -> None:
         await event.get_sender()
-        reply_message = await event.get_reply_message() if event.message.is_reply else None
+        reply_message = (
+            await event.get_reply_message() if event.message.is_reply else None
+        )
         if reply_message is not None and getattr(reply_message, "sender", None) is None:
             await reply_message.get_sender()
 
@@ -138,10 +135,7 @@ async def run() -> None:
             service_name=settings.service_name,
             reply_to=_extract_reply_payload(reply_message),
         )
-        routing_key = _build_routing_key(
-            payload["chat_id"],
-            fallback=settings.mq_routing_key,
-        )
+        routing_key = _build_routing_key(payload["chat_id"], fallback="chat:unknown")
         await publisher.publish(payload, routing_key=routing_key)
         logger.info(
             "Published message chat_id=%s message_id=%s routing_key=%s payload=%s",

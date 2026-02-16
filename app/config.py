@@ -43,8 +43,6 @@ class Settings:
 
     mq_url: str
     mq_exchange: str
-    mq_queue: str
-    mq_routing_key: str
     mq_persistent: bool
 
     service_name: str
@@ -58,8 +56,6 @@ class Settings:
 
         mq_url = os.getenv("MQ_URL", "amqp://guest:guest@rabbitmq:5672/").strip()
         mq_exchange = os.getenv("MQ_EXCHANGE", "telegram.messages").strip()
-        mq_queue = os.getenv("MQ_QUEUE", "telegram.messages.raw").strip()
-        mq_routing_key = os.getenv("MQ_ROUTING_KEY", "telegram.message").strip()
         mq_persistent = _as_bool(os.getenv("MQ_PERSISTENT", "true"), default=True)
 
         service_name = os.getenv("SERVICE_NAME", "telegram-userbot-listener").strip()
@@ -71,8 +67,6 @@ class Settings:
             tg_target_chat=tg_target_chat,
             mq_url=mq_url,
             mq_exchange=mq_exchange,
-            mq_queue=mq_queue,
-            mq_routing_key=mq_routing_key,
             mq_persistent=mq_persistent,
             service_name=service_name,
         )

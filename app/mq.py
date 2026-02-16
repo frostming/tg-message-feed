@@ -22,14 +22,8 @@ class MQPublisher:
         self._connection = await aio_pika.connect_robust(self._settings.mq_url)
         self._channel = await self._connection.channel()
         self._exchange = await self._channel.declare_exchange(
-            self._settings.mq_exchange,
-            ExchangeType.TOPIC,
-            durable=True,
+            self._settings.mq_exchange, ExchangeType.TOPIC, durable=True
         )
-
-        queue = await self._channel.declare_queue(self._settings.mq_queue, durable=True)
-        # Bind all routing keys so one queue can still consume messages from all chats.
-        await queue.bind(self._exchange, routing_key="#")
 
     async def publish(self, payload: Dict[str, Any], routing_key: str) -> None:
         if self._exchange is None:
