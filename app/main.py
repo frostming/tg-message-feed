@@ -26,10 +26,17 @@ def _build_payload(event: events.NewMessage.Event, service_name: str) -> Dict[st
         "chat_id": message.chat_id,
         "message_id": message.id,
         "sender_id": event.sender_id,
+        "sender_username": event.sender.username if event.sender else None,
+        "sender_fullname": event.sender.first_name
+        + (f" {event.sender.last_name}" if event.sender.last_name else "")
+        if event.sender
+        else None,
         "text": message.message,
         "date": message.date.astimezone(UTC).isoformat() if message.date else None,
         "is_reply": message.is_reply,
-        "reply_to_msg_id": message.reply_to.reply_to_msg_id if message.reply_to else None,
+        "reply_to_msg_id": message.reply_to.reply_to_msg_id
+        if message.reply_to
+        else None,
         "has_media": bool(message.media),
         "out": message.out,
     }
@@ -47,16 +54,21 @@ async def run() -> None:
         settings.mq_routing_key,
     )
 
-    client = TelegramClient(StringSession(settings.tg_session_string), settings.tg_api_id, settings.tg_api_hash)
+    client = TelegramClient(
+        StringSession(settings.tg_session_string),
+        settings.tg_api_id,
+        settings.tg_api_hash,
+    )
 
     @client.on(events.NewMessage(chats=settings.tg_target_chat))
     async def on_new_message(event: events.NewMessage.Event) -> None:
         payload = _build_payload(event, service_name=settings.service_name)
         await publisher.publish(payload)
         logger.info(
-            "Published message chat_id=%s message_id=%s",
+            "Published message chat_id=%s message_id=%s payload=%s",
             payload["chat_id"],
             payload["message_id"],
+            payload,
         )
 
     await client.connect()
