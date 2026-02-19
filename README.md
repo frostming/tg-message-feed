@@ -131,3 +131,4 @@ The JSON Schema for payload validation is available at:
 - This uses a user account session; make sure usage complies with Telegram ToS.
 - `TG_SESSION_STRING` is sensitive and should be treated like a credential.
 - Current implementation handles only `NewMessage` events.
+- Disclaimer: Improper use of this feed (for example, wiring bot outputs back into bot inputs) can cause bots to reply to each other indefinitely, exhausting token quotas.
