@@ -2,8 +2,8 @@
 
 This repository provides a minimal deployable pipeline:
 
-- `Telethon` userbot listens to all new messages in one target chat
-- Events are published to RabbitMQ
+- `Telethon` userbot listens to new messages in one or more target chats (numeric IDs)
+- Events are published to RabbitMQ (topic exchange)
 - Full stack runs with `docker compose`
 
 ## Project Layout
@@ -24,16 +24,17 @@ This repository provides a minimal deployable pipeline:
 ## 1. Create Telegram API credentials
 
 1. Open `https://my.telegram.org` and create an app to get `api_id` and `api_hash`.
-2. Generate a session string locally:
+2. Generate a session string locally (requires `TG_API_ID` and `TG_API_HASH` in your environment):
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python tools/generate_session.py
+uv sync
+TG_API_ID=... TG_API_HASH=... uv run python tools/generate_session.py
 ```
 
 Copy the printed value into `TG_SESSION_STRING`.
+
+Note: `tools/generate_session.py` currently uses a hardcoded HTTP proxy at `127.0.0.1:7890`.
+Edit the script if you do not want to use a proxy.
 
 ## 2. Configure environment
 
@@ -43,15 +44,8 @@ cp .env.example .env
 
 Important values:
 
-- `TG_TARGET_CHAT`: chat ID (recommended, such as `-100...`) or public username
+- `TG_TARGET_CHAT`: comma-separated numeric chat IDs (recommended, such as `-100...`)
 - `TG_SESSION_STRING`: authorized user session
-
-If session generation fails with `ModuleNotFoundError: No module named 'telethon'`,
-install dependencies first:
-
-```bash
-pip install -r requirements.txt
-```
 
 ## 3. Deploy
 
@@ -69,16 +63,22 @@ docker compose logs -f telegram-listener
 
 When you see `Published message`, events are being pushed to RabbitMQ.
 
-RabbitMQ management UI:
+RabbitMQ management UI (not exposed by default in `docker-compose.yaml`):
 
 - URL: `http://localhost:15672`
 - Username: `RABBITMQ_USER`
 - Password: `RABBITMQ_PASSWORD`
 
-Default queue: `telegram.messages.raw`
-Routing key format for published messages: `chat:{chat_id}`
+The compose file only exposes AMQP on `localhost:35672` (`5672` in the container).
+If you want the management UI, add a port mapping for `15672`.
 
-The default queue is bound with `#`, so it receives all chat-specific routing keys.
+## RabbitMQ Publishing Details
+
+The listener publishes to a topic exchange named by `MQ_EXCHANGE` (default: `telegram.messages`).
+No queue is declared by the app, so consumers must create a queue and bind it to the exchange.
+
+Routing key format for published messages: `chat:{chat_id}` (or `chat:unknown` if missing).
+Use bindings like `chat:*` or `#` to receive all chat-specific routing keys.
 
 ## Event Schema
 

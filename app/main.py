@@ -151,7 +151,7 @@ async def run() -> None:
             "Telegram session is not authorized. Generate a valid TG_SESSION_STRING first."
         )
 
-    logger.info("Listening chat=%s", settings.tg_target_chat)
+    logger.info("Listening chats=%s", settings.tg_target_chat)
 
     try:
         await client.run_until_disconnected()

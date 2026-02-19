@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass
-from typing import Union
 
 
 class ConfigError(ValueError):
@@ -25,13 +24,16 @@ def _as_bool(value: str, default: bool = False) -> bool:
     return default
 
 
-def _as_chat(value: str) -> Union[int, str]:
-    stripped = value.strip()
-    if stripped.startswith("-") and stripped[1:].isdigit():
-        return int(stripped)
-    if stripped.isdigit():
-        return int(stripped)
-    return stripped
+def _as_chat(value: str) -> list[int]:
+    parts = value.strip().split(",")
+    result = []
+    for part in parts:
+        stripped = part.strip()
+        if stripped.startswith("-") and stripped[1:].isdigit():
+            result.append(int(stripped))
+        elif stripped.isdigit():
+            result.append(int(stripped))
+    return result
 
 
 @dataclass(frozen=True)
@@ -39,7 +41,7 @@ class Settings:
     tg_api_id: int
     tg_api_hash: str
     tg_session_string: str
-    tg_target_chat: Union[int, str]
+    tg_target_chat: list[int]
 
     mq_url: str
     mq_exchange: str
