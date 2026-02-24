@@ -37,9 +37,11 @@ def _extract_media_payload(message: Any) -> Dict[str, Any] | None:
         return None
 
     file = message.file
+    media_id = None
     media_type = "unknown"
     if message.photo:
         media_type = "photo"
+        media_id = getattr(message.photo, "id", None)
     elif message.video:
         media_type = "video"
     elif message.voice:
@@ -52,12 +54,15 @@ def _extract_media_payload(message: Any) -> Dict[str, Any] | None:
         media_type = "sticker"
     elif message.document:
         media_type = "document"
+        media_id = getattr(message.document, "id", None)
+    elif message.media:
+        media_id = getattr(message.media, "id", None)
 
     return {
         "type": media_type,
         "class_name": message.media.__class__.__name__,
         "grouped_id": message.grouped_id,
-        "file_id": getattr(file, "id", None) if file else None,
+        "file_id": media_id or (getattr(file, "id", None) if file else None),
         "name": getattr(file, "name", None) if file else None,
         "ext": getattr(file, "ext", None) if file else None,
         "mime_type": getattr(file, "mime_type", None) if file else None,
