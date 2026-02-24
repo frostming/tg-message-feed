@@ -33,8 +33,20 @@ TG_API_ID=... TG_API_HASH=... uv run python tools/generate_session.py
 
 Copy the printed value into `TG_SESSION_STRING`.
 
-Note: `tools/generate_session.py` currently uses a hardcoded HTTP proxy at `127.0.0.1:7890`.
-Edit the script if you do not want to use a proxy.
+Optional: set `TG_PROXY` if you need to connect via a proxy.
+
+The app also respects standard proxy environment variables (`ALL_PROXY`, `HTTPS_PROXY`, `HTTP_PROXY`, and lowercase variants). `TG_PROXY` takes precedence when set.
+
+Examples:
+
+```bash
+TG_PROXY=http://127.0.0.1:7890
+TG_PROXY=socks5://127.0.0.1:1080
+TG_PROXY=socks5://user:pass@127.0.0.1:1080
+
+# Or via standard env vars
+ALL_PROXY=socks5://127.0.0.1:1080
+```
 
 ## 2. Configure environment
 

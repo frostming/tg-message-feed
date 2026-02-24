@@ -115,10 +115,15 @@ async def run() -> None:
     await publisher.connect()
     logger.info("Connected to MQ exchange=%s", settings.mq_exchange)
 
+    client_kwargs: dict[str, Any] = {}
+    if settings.tg_proxy is not None:
+        client_kwargs["proxy"] = settings.tg_proxy
+
     client = TelegramClient(
         StringSession(settings.tg_session_string),
         settings.tg_api_id,
         settings.tg_api_hash,
+        **client_kwargs,
     )
 
     @client.on(events.NewMessage(chats=settings.tg_target_chat))
