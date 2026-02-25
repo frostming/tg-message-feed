@@ -139,7 +139,8 @@ async def run() -> None:
         )
         if reply_message is not None and getattr(reply_message, "sender", None) is None:
             await reply_message.get_sender()
-
+        if settings.bot_only and not getattr(event.sender, "bot", None):
+            return
         payload = _build_payload(
             event,
             service_name=settings.service_name,
@@ -161,7 +162,9 @@ async def run() -> None:
             "Telegram session is not authorized. Generate a valid TG_SESSION_STRING first."
         )
 
-    logger.info("Listening chats=%s", settings.tg_target_chat)
+    logger.info(
+        "Listening chats=%s, bot_only=%s", settings.tg_target_chat, settings.bot_only
+    )
 
     try:
         await client.run_until_disconnected()

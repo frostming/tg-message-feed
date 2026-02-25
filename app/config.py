@@ -130,6 +130,7 @@ class Settings:
     mq_persistent: bool
 
     service_name: str
+    bot_only: bool = True
 
     @classmethod
     def from_env(cls) -> "Settings":
@@ -144,6 +145,7 @@ class Settings:
         mq_persistent = _as_bool(os.getenv("MQ_PERSISTENT", "true"), default=True)
 
         service_name = os.getenv("SERVICE_NAME", "telegram-userbot-listener").strip()
+        bot_only = _as_bool(os.getenv("BOT_ONLY", "true"), default=True)
 
         return cls(
             tg_api_id=tg_api_id,
@@ -155,4 +157,5 @@ class Settings:
             mq_exchange=mq_exchange,
             mq_persistent=mq_persistent,
             service_name=service_name,
+            bot_only=bot_only,
         )
