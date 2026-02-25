@@ -58,7 +58,6 @@ def _extract_media_payload(message: Any) -> Dict[str, Any] | None:
         media_type = "sticker"
     elif message.document:
         media_type = "document"
-    breakpoint()  # For debugging other media types
     return {
         "type": media_type,
         "class_name": message.media.__class__.__name__,
