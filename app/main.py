@@ -7,7 +7,16 @@ from datetime import UTC
 from typing import Any, Dict
 
 from telethon import TelegramClient, events
+from telethon.extensions import html
+from telethon.helpers import add_surrogate, del_surrogate
 from telethon.sessions import StringSession
+from telethon.tl.types import (
+    InputMessageEntityMentionName,
+    MessageEntityEmail,
+    MessageEntityMentionName,
+    MessageEntityTextUrl,
+    MessageEntityUrl,
+)
 
 from app.config import Settings
 from app.mq import MQPublisher
@@ -78,21 +87,28 @@ def _extract_reply_payload(reply_message: Any | None) -> Dict[str, Any] | None:
         return None
 
     reply_sender = getattr(reply_message, "sender", None)
+    text_html = _extract_html_text(reply_message)
     return {
         "message_id": reply_message.id,
         "sender_id": getattr(reply_message, "sender_id", None),
         "sender_username": getattr(reply_sender, "username", None),
         "sender_fullname": _build_fullname(reply_sender),
         "text": reply_message.message,
-        "text_html": _extract_html_text(reply_message),
+        "text_html": text_html,
     }
 
 
 def _extract_html_text(message: Any) -> str | None:
-    html_text = getattr(message, "text_html", None)
-    if isinstance(html_text, str):
-        return html_text
-    return getattr(message, "message", None)
+    # Telethon's Message object does not have a native .text_html attribute.
+    # We use html.unparse to project the text and entities into HTML.
+    # This ensures characters like '<' and '&' are properly escaped,
+    # making it safe for downstream consumers using Bot API HTML mode.
+    text = getattr(message, "message", None)
+    entities = getattr(message, "entities", None) or []
+    try:
+        return html.unparse(text, entities)
+    except Exception:
+        return text
 
 
 def _build_payload(
@@ -102,6 +118,7 @@ def _build_payload(
 ) -> Dict[str, Any]:
     message = event.message
     sender = event.sender
+    text_html = _extract_html_text(message)
     return {
         "service": service_name,
         "event": "telegram.new_message",
@@ -112,7 +129,7 @@ def _build_payload(
         "sender_username": getattr(sender, "username", None),
         "sender_fullname": _build_fullname(sender),
         "text": message.message,
-        "text_html": _extract_html_text(message),
+        "text_html": text_html,
         "date": message.date.astimezone(UTC).isoformat() if message.date else None,
         "is_reply": message.is_reply,
         "reply_to": reply_to,
