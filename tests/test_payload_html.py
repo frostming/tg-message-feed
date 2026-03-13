@@ -67,3 +67,22 @@ class PayloadHtmlTests(TestCase):
 
         self.assertEqual(payload["text"], "plain text")
         self.assertEqual(payload["text_html"], "plain text")
+
+    def test_plain_text_is_html_escaped_without_entities(self) -> None:
+        sender = SimpleNamespace(bot=False, username=None, first_name="Carol")
+        message = SimpleNamespace(
+            chat_id=-100123,
+            id=43,
+            message="<b>plain</b>",
+            entities=None,
+            date=datetime(2026, 3, 13, tzinfo=UTC),
+            is_reply=False,
+            media=None,
+            out=False,
+        )
+        event = SimpleNamespace(message=message, sender=sender, sender_id=777)
+
+        payload = _build_payload(event, service_name="test-service", reply_to=None)
+
+        self.assertEqual(payload["text"], "<b>plain</b>")
+        self.assertEqual(payload["text_html"], "&lt;b&gt;plain&lt;/b&gt;")
