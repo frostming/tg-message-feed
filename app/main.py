@@ -8,6 +8,7 @@ from datetime import UTC
 from typing import Any, Dict
 
 from telethon import TelegramClient, events
+from telethon.extensions import html
 from telethon.sessions import StringSession
 
 from app.config import Settings
@@ -91,10 +92,14 @@ def _extract_reply_payload(reply_message: Any | None) -> Dict[str, Any] | None:
 
 
 def _extract_html_text(message: Any) -> str | None:
-    html_text = getattr(message, "text_html", None)
-    if isinstance(html_text, str):
-        return html_text
-    return getattr(message, "message", None)
+    # Telethon's Message object doesn't have a direct 'text_html' attribute.
+    # We must use telethon.extensions.html.unparse to generate it from entities.
+    try:
+        if not getattr(message, "entities", None):
+            return getattr(message, "message", None)
+        return html.unparse(message.message, message.entities)
+    except Exception:
+        return getattr(message, "message", None)
 
 
 def _build_payload(
