@@ -107,6 +107,7 @@ Published payload is JSON, for example:
   "sender_username": "alice",
   "sender_fullname": "Alice Chen",
   "text": "hello",
+  "text_html": "hello",
   "date": "2026-02-16T06:00:00+00:00",
   "is_reply": true,
   "reply_to": {
@@ -114,7 +115,8 @@ Published payload is JSON, for example:
     "sender_id": 9999,
     "sender_username": "bob",
     "sender_fullname": "Bob Li",
-    "text": "previous message"
+    "text": "previous message",
+    "text_html": "previous message"
   },
   "has_media": true,
   "media": {
@@ -137,6 +139,8 @@ Published payload is JSON, for example:
 The JSON Schema for payload validation is available at:
 
 - `schemas/telegram_message.schema.json`
+
+`text` remains the plain message text. `text_html` carries Telethon's HTML-rendered version of the same content, which preserves Telegram entities such as user mention links rendered as `<a href="tg://user?id=USER_ID">Name</a>`.
 
 ## Notes
 

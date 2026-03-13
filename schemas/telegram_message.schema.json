@@ -14,6 +14,7 @@
     "sender_username",
     "sender_fullname",
     "text",
+    "text_html",
     "date",
     "is_reply",
     "reply_to",
@@ -52,6 +53,9 @@
     "text": {
       "type": ["string", "null"]
     },
+    "text_html": {
+      "type": ["string", "null"]
+    },
     "date": {
       "type": ["string", "null"],
       "format": "date-time"
@@ -72,7 +76,8 @@
             "sender_id",
             "sender_username",
             "sender_fullname",
-            "text"
+            "text",
+            "text_html"
           ],
           "properties": {
             "message_id": {
@@ -89,6 +94,9 @@
               "type": ["string", "null"]
             },
             "text": {
+              "type": ["string", "null"]
+            },
+            "text_html": {
               "type": ["string", "null"]
             }
           }
