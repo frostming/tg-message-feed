@@ -8,15 +8,7 @@ from typing import Any, Dict
 
 from telethon import TelegramClient, events
 from telethon.extensions import html
-from telethon.helpers import add_surrogate, del_surrogate
 from telethon.sessions import StringSession
-from telethon.tl.types import (
-    InputMessageEntityMentionName,
-    MessageEntityEmail,
-    MessageEntityMentionName,
-    MessageEntityTextUrl,
-    MessageEntityUrl,
-)
 
 from app.config import Settings
 from app.mq import MQPublisher

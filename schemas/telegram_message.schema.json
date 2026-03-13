@@ -18,8 +18,7 @@
     "reply_to",
     "has_media",
     "media",
-    "out",
-    "links"
+    "out"
   ],
   "properties": {
     "service": {
@@ -105,12 +104,6 @@
     },
     "out": {
       "type": "boolean"
-    },
-    "links": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      }
     }
   }
 }
