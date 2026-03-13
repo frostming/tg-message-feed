@@ -84,7 +84,15 @@ def _extract_reply_payload(reply_message: Any | None) -> Dict[str, Any] | None:
         "sender_username": getattr(reply_sender, "username", None),
         "sender_fullname": _build_fullname(reply_sender),
         "text": reply_message.message,
+        "text_html": _extract_html_text(reply_message),
     }
+
+
+def _extract_html_text(message: Any) -> str | None:
+    html_text = getattr(message, "text_html", None)
+    if isinstance(html_text, str):
+        return html_text
+    return getattr(message, "message", None)
 
 
 def _build_payload(
@@ -104,6 +112,7 @@ def _build_payload(
         "sender_username": getattr(sender, "username", None),
         "sender_fullname": _build_fullname(sender),
         "text": message.message,
+        "text_html": _extract_html_text(message),
         "date": message.date.astimezone(UTC).isoformat() if message.date else None,
         "is_reply": message.is_reply,
         "reply_to": reply_to,
