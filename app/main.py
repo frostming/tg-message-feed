@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import base64
 import logging
+import re
 from datetime import UTC
 from typing import Any, Dict
 
@@ -85,6 +86,7 @@ def _extract_reply_payload(reply_message: Any | None) -> Dict[str, Any] | None:
         "sender_fullname": _build_fullname(reply_sender),
         "text": reply_message.message,
         "text_html": _extract_html_text(reply_message),
+        "links": re.findall(r'href="(tg://user\?id=\d+)"', _extract_html_text(reply_message) or ""),
     }
 
 
@@ -119,6 +121,7 @@ def _build_payload(
         "has_media": bool(message.media),
         "media": _extract_media_payload(message),
         "out": message.out,
+        "links": re.findall(r'href="(tg://user\?id=\d+)"', _extract_html_text(message) or ""),
     }
 
 

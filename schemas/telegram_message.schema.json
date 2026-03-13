@@ -1,9 +1,7 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/schemas/telegram_message.schema.json",
-  "title": "TelegramNewMessagePayload",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Telegram Message",
   "type": "object",
-  "additionalProperties": false,
   "required": [
     "service",
     "event",
@@ -20,26 +18,24 @@
     "reply_to",
     "has_media",
     "media",
-    "out"
+    "out",
+    "links"
   ],
   "properties": {
     "service": {
-      "type": "string",
-      "minLength": 1
+      "type": "string"
     },
     "event": {
-      "type": "string",
-      "const": "telegram.new_message"
+      "type": "string"
     },
     "chat_id": {
       "type": "integer"
     },
     "message_id": {
-      "type": "integer",
-      "minimum": 1
+      "type": "integer"
     },
     "sender_id": {
-      "type": ["integer", "null"]
+      "type": "integer"
     },
     "is_bot": {
       "type": "boolean"
@@ -64,173 +60,57 @@
       "type": "boolean"
     },
     "reply_to": {
-      "anyOf": [
-        {
-          "type": "null"
+      "type": ["object", "null"],
+      "required": [
+        "message_id",
+        "sender_id",
+        "sender_username",
+        "sender_fullname",
+        "text",
+        "text_html",
+        "links"
+      ],
+      "properties": {
+        "message_id": {
+          "type": "integer"
         },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "message_id",
-            "sender_id",
-            "sender_username",
-            "sender_fullname",
-            "text",
-            "text_html"
-          ],
-          "properties": {
-            "message_id": {
-              "type": "integer",
-              "minimum": 1
-            },
-            "sender_id": {
-              "type": ["integer", "null"]
-            },
-            "sender_username": {
-              "type": ["string", "null"]
-            },
-            "sender_fullname": {
-              "type": ["string", "null"]
-            },
-            "text": {
-              "type": ["string", "null"]
-            },
-            "text_html": {
-              "type": ["string", "null"]
-            }
+        "sender_id": {
+          "type": "integer"
+        },
+        "sender_username": {
+          "type": ["string", "null"]
+        },
+        "sender_fullname": {
+          "type": ["string", "null"]
+        },
+        "text": {
+          "type": ["string", "null"]
+        },
+        "text_html": {
+          "type": ["string", "null"]
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "type": "string"
           }
         }
-      ]
+      }
     },
     "has_media": {
       "type": "boolean"
     },
     "media": {
-      "anyOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "object",
-          "additionalProperties": false,
-          "required": [
-            "type",
-            "class_name",
-            "grouped_id",
-            "file_id",
-            "name",
-            "ext",
-            "mime_type",
-            "size",
-            "width",
-            "height",
-            "duration"
-          ],
-          "properties": {
-            "type": {
-              "type": "string",
-              "enum": [
-                "photo",
-                "video",
-                "voice",
-                "audio",
-                "gif",
-                "sticker",
-                "document",
-                "unknown"
-              ]
-            },
-            "class_name": {
-              "type": "string"
-            },
-            "grouped_id": {
-              "type": ["integer", "null"]
-            },
-            "file_id": {
-              "type": ["integer", "string", "null"]
-            },
-            "name": {
-              "type": ["string", "null"]
-            },
-            "ext": {
-              "type": ["string", "null"]
-            },
-            "mime_type": {
-              "type": ["string", "null"]
-            },
-            "size": {
-              "type": ["integer", "null"],
-              "minimum": 0
-            },
-            "width": {
-              "type": ["integer", "null"],
-              "minimum": 0
-            },
-            "height": {
-              "type": ["integer", "null"],
-              "minimum": 0
-            },
-            "duration": {
-              "type": ["integer", "number", "null"],
-              "minimum": 0
-            }
-          }
-        }
-      ]
+      "type": ["object", "null"]
     },
     "out": {
       "type": "boolean"
-    }
-  },
-  "allOf": [
-    {
-      "if": {
-        "properties": {
-          "is_reply": {
-            "const": true
-          }
-        },
-        "required": ["is_reply"]
-      },
-      "then": {
-        "properties": {
-          "reply_to": {
-            "type": "object"
-          }
-        }
-      },
-      "else": {
-        "properties": {
-          "reply_to": {
-            "type": "null"
-          }
-        }
-      }
     },
-    {
-      "if": {
-        "properties": {
-          "has_media": {
-            "const": true
-          }
-        },
-        "required": ["has_media"]
-      },
-      "then": {
-        "properties": {
-          "media": {
-            "type": "object"
-          }
-        }
-      },
-      "else": {
-        "properties": {
-          "media": {
-            "type": "null"
-          }
-        }
+    "links": {
+      "type": "array",
+      "items": {
+        "type": "string"
       }
     }
-  ]
+  }
 }
