@@ -1,6 +1,7 @@
 # Telegram Userbot to RabbitMQ (Docker Compose)
 
-This repository provides a minimal deployable pipeline:
+> [!NOTE]
+> Since Telegram officially supports [bot-to-bot communication](https://core.telegram.org/bots/features#bot-to-bot-communication), the hack method of this project has become history and is no longer needed.
 
 - `Telethon` userbot listens to new messages in one or more target chats (numeric IDs)
 - Events are published to RabbitMQ (topic exchange)
